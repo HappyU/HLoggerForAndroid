@@ -19,7 +19,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
-import android.util.Log;
 
 /**
  * Created by liubo on 14-9-16.
@@ -52,17 +51,15 @@ public class LogPoint
 		}
 	}
 
-	static TelephonyManager telephonyManager;
-
 	/**
 	 * 获取系统的ID——IMEI
 	 * */
 	public static String getSysImei(Context context)
 	{
 		// TODO Auto-generated method stub
-		telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		TelephonyManager telephonyManager = (TelephonyManager) context
+				.getSystemService(Context.TELEPHONY_SERVICE);
 		String imei = telephonyManager.getDeviceId();
-		Log.i("imei", "" + imei);
 		if (null == imei) {
 			imei = "";
 		}
@@ -115,7 +112,7 @@ public class LogPoint
 			if (ni == null) {
 				// Toast.makeText(getApplicationContext(), "当前无网络连接", Toast.LENGTH_SHORT).show();
 
-				return "net work not avaiable";
+				return NONE;
 			}
 
 			network = ni.getTypeName();
@@ -141,7 +138,7 @@ public class LogPoint
 			if (ni == null) {
 				// Toast.makeText(getApplicationContext(), "当前无网络连接", Toast.LENGTH_SHORT).show();
 
-				return "null";
+				return NONE;
 			}
 
 			network = ni.getTypeName();
@@ -162,9 +159,9 @@ public class LogPoint
 	}
 
 	/**
-	 * 转行ip地址
+	 * 转换ip地址
 	 * */
-	public static String intToIp(int i)
+	private static String intToIp(int i)
 	{
 
 		return (i & 0xFF) + "." + ((i >> 8) & 0xFF) + "." + ((i >> 16) & 0xFF) + "."
@@ -174,7 +171,7 @@ public class LogPoint
 	/**
 	 * 获取mobile状态下的ip地址
 	 * */
-	public static String getLocalIpAddress()
+	private static String getLocalIpAddress()
 	{
 		try {
 			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
@@ -189,7 +186,7 @@ public class LogPoint
 				}
 			}
 		} catch (SocketException ex) {
-			Log.e("WifiPreference IpAddress", ex.toString());
+			ex.toString();
 		}
 		return null;
 	}
@@ -232,8 +229,11 @@ public class LogPoint
 	 * Info类型信息
 	 * */
 	public static final String INFO = "LogInfo";
+	/**
+	 * 未获取信息
+	 * */
+	public static final String NONE = "NONE";
 
-	// 预留 系统状态（CPU，内存）
 	/**
 	 * 获取系统的CPU使用率
 	 * */
