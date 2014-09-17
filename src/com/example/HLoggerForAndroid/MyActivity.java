@@ -23,7 +23,7 @@ public class MyActivity extends Activity
 		// speString = LogPoint.getRunningActivityName(this);
 		// speString = LogPoint.getSystemVersion();
 		// speString = LogPoint.getVersion(getApplicationContext());
-		speString = LogPoint.ipAddress;
+		speString = LogPoint.getIpAddress(this);
 		speString = LogPoint.getAppId(this);
 		speString = LogPoint.getSysAvaialbeMemorySize(this);
 		speString = LogPoint.testCpuRate();

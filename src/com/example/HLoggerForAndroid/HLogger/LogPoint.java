@@ -27,11 +27,6 @@ import android.util.Log;
 public class LogPoint
 {
 	/**
-	 * ip地址
-	 * */
-	public static String ipAddress;
-
-	/**
 	 * 获取类的名称
 	 * */
 	public static String getClassName(Context context)
@@ -125,6 +120,32 @@ public class LogPoint
 
 			network = ni.getTypeName();
 
+		}
+
+		return network;
+
+	}
+
+	/**
+	 * ip地址
+	 * */
+	public static String getIpAddress(Context context)
+	{
+
+		String network = "";
+		String ipAddress = null;
+		ConnectivityManager cm = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (cm != null) {
+			NetworkInfo ni = cm.getActiveNetworkInfo();
+			if (ni == null) {
+				// Toast.makeText(getApplicationContext(), "当前无网络连接", Toast.LENGTH_SHORT).show();
+
+				return "null";
+			}
+
+			network = ni.getTypeName();
+
 			if (ni.getTypeName().equals("WIFI")) {
 				WifiManager wifiManager = (WifiManager) context
 						.getSystemService(Context.WIFI_SERVICE);
@@ -137,9 +158,7 @@ public class LogPoint
 			}
 
 		}
-
-		return network;
-
+		return ipAddress;
 	}
 
 	/**
