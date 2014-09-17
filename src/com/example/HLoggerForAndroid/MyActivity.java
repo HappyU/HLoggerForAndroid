@@ -16,13 +16,17 @@ public class MyActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		String speString;
-//		speString = LogPoint.getDate();
-//		speString = LogPoint.getDeviceType();
-//		speString = LogPoint.getImei(getApplicationContext());
-//		speString = LogPoint.getNetType(getApplicationContext());
-//		speString = LogPoint.getRunningActivityName(this);
-//		speString = LogPoint.getSystemVersion();
-//		speString = LogPoint.getVersion(getApplicationContext());
-//		speString = LogPoint.ipAddress;
+		// speString = LogPoint.getDate();
+		// speString = LogPoint.getDeviceType();
+		// speString = LogPoint.getImei(getApplicationContext());
+		// speString = LogPoint.getNetType(getApplicationContext());
+		// speString = LogPoint.getRunningActivityName(this);
+		// speString = LogPoint.getSystemVersion();
+		// speString = LogPoint.getVersion(getApplicationContext());
+		speString = LogPoint.ipAddress;
+		speString = LogPoint.getAppId(this);
+		speString = LogPoint.getSysAvaialbeMemorySize(this);
+		speString = LogPoint.testCpuRate();
+
 	}
 }
