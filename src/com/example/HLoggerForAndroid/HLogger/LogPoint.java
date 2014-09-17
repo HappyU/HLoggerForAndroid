@@ -54,7 +54,7 @@ public class LogPoint
 	/**
 	 * 获取系统的ID——IMEI
 	 * */
-	public static String getSysImei(Context context)
+	public static String getDeviceId(Context context)
 	{
 		// TODO Auto-generated method stub
 		TelephonyManager telephonyManager = (TelephonyManager) context
