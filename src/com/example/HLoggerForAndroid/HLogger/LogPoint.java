@@ -24,14 +24,15 @@ public class LogPoint
 {
 	public static String ipAddress;
 
-	public static String getRunningActivityName(Context context)
+
+	public static String getClassyName(Context context)
 	{
 		String contextString = context.toString();
 		return contextString.substring(contextString.lastIndexOf(".") + 1,
 				contextString.indexOf("@"));
 	}
 
-	public static String getVersion(Context context)// 获取版本号
+	public static String getAppVersion(Context context)// 获取版本号
 	{
 		try {
 			PackageInfo pi = context.getPackageManager()
@@ -46,7 +47,7 @@ public class LogPoint
 
 	static TelephonyManager telephonyManager;
 
-	public static String getImei(Context context)
+	public static String getSysImei(Context context)
 	{
 		// TODO Auto-generated method stub
 		telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -64,13 +65,15 @@ public class LogPoint
 		return deviceType;
 	}
 
-	public static String getSystemVersion()
+	public static String getSysVersion()
 	{
 		String systemVersion = "" + android.os.Build.VERSION.RELEASE;
 		return systemVersion;
 	}
 
-	public static String getDate()
+
+    //时间戳
+	public static String getCurDate()
 	{
 
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -139,5 +142,11 @@ public class LogPoint
 		}
 		return null;
 	}
+
+    //获得appID
+
+    //获得 请求方式，信息类型（常量）
+
+    //预留 系统状态（CPU，内存）
 
 }
