@@ -5,15 +5,15 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
+import android.util.Log;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import org.apache.http.Header;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 
 
 
@@ -24,7 +24,7 @@ public class LogFile
 {
 
 
-    private static final int LOG_MAX_SIZE = 10 * 1024 * 1024;                        //内存中日志文件最大值，10M
+    private static final int LOG_MAX_SIZE = 3  * 1024;                        //内存中日志文件最大值，3kb
 
     /*
     private Handler handler = new Handler()
@@ -64,6 +64,8 @@ public class LogFile
 
     FileWriter objFilerWriter = null;
     BufferedWriter objBufferedWriter = null;
+    Handler writeHandler = null;
+    Handler uploadHandler = null;
 
 
     public static LogFile getInstance(String tagInfo)
@@ -75,7 +77,8 @@ public class LogFile
 
     public LogFile()
     {
-//        setLogPath();
+        writeHandler = new Handler();
+        uploadHandler = new Handler();
     }
 
     // 存放日志文件的目录全路径
@@ -84,7 +87,7 @@ public class LogFile
     /**
      * 设置日志的路径
      **/
-    private void setLogPath()
+    private String getSDPath()
     {
          do
          {
@@ -123,6 +126,8 @@ public class LogFile
                  m_strLogFolderPath = strSaveLogPath;
              }
          }while (false);
+
+        return m_strLogFolderPath;
     }
 
     /**
@@ -130,9 +135,12 @@ public class LogFile
      **/
     private String getDataPath()
     {
-        Context context = ContextUtil.getInstance();
-        File file = context.getDir("logs",Context.MODE_PRIVATE);
-        return file.getPath();
+//        Context context = ContextUtil.getInstance();
+//        File file = context.getDir("logs",Context.MODE_PRIVATE);
+
+        String str = getSDPath();
+
+        return str;
     }
 
     /**
@@ -186,9 +194,6 @@ public class LogFile
      **/
     public void writeLogFile(String headerMsg)
     {
-
-
-
         do // 非循环，只是为了减少分支缩进深度
         {
             File fileLogFilePath = new File( getDataPath(), getLogInfo());
@@ -212,7 +217,6 @@ public class LogFile
                 objBufferedWriter = new BufferedWriter( objFilerWriter );
             }
 
-
             try
             {
                 objBufferedWriter.write( headerMsg );
@@ -226,44 +230,77 @@ public class LogFile
         }while( false );
     }
 
+
+
+    class WriteLogRunnable implements Runnable
+    {
+        private String msgStr;
+        private ILog iLogImpl;
+
+        public WriteLogRunnable(String msg,ILog iLog)
+        {
+            msgStr = msg;
+            iLogImpl = iLog;
+        }
+
+        @Override
+        public void run()
+        {
+            readyWrite(msgStr,iLogImpl);
+        }
+    }
+
+
+    public void readyWrite(String msgStr,ILog iLogImpl)
+    {
+        String logName = getLogInfo();
+        if (logName.equals(""))
+        {
+            boolean isCreate = createFile();
+            if (isCreate)
+            {
+                String headerStr = iLogImpl.getHeaderInfo();
+                writeLogFile(headerStr);
+                writeLogFile(msgStr);
+            }
+        }
+        else
+        {
+            writeLogFile(msgStr);
+        }
+
+        boolean isOver = isLogOverSize();
+        if(isOver)
+        {
+            //先打zip包
+            try
+            {
+                String filePath = getSDPath()+java.io.File.separator+getLogInfo();
+                String zipPath =  getSDPath()+java.io.File.separator+getLogInfo().replace(".log",".zip");
+                ZipUtil.zipFolder(filePath,zipPath);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            //创建新的txt文本
+            boolean isCreate = createFile();
+            if (isCreate)
+            {
+                String headerStr = iLogImpl.getHeaderInfo();
+                writeLogFile(headerStr);
+            }
+        }
+    }
+
+
+
     /**
      * 有回调函数的保存方法
      **/
     public void writeLogFile(final String strMsg,final ILog iLog )
     {
-        Thread saveThread = new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                String logName = getLogInfo();
-                if (logName.equals(""))
-                {
-                    boolean isCreate = createFile();
-                    if (isCreate)
-                    {
-                        String headerStr = iLog.getHeaderInfo();
-                        writeLogFile(headerStr);
-                    }
-                }
-                else
-                {
-                    writeLogFile(strMsg);
-                }
-
-                boolean isOver = isLogOverSize();
-                if(isOver)
-                {
-                    boolean isCreate = createFile();
-                    if (isCreate)
-                    {
-                        String headerStr = iLog.getHeaderInfo();
-                        writeLogFile(headerStr);
-                    }
-                }
-            }
-        });
-        saveThread.start();
+        WriteLogRunnable logRunnable = new WriteLogRunnable(strMsg,iLog);
+        writeHandler.post(logRunnable);
     }
 
     /**
@@ -281,25 +318,25 @@ public class LogFile
                 try
                 {
                     objBufferedWriter.close();
+                    objBufferedWriter = null;
                 }
                 catch (IOException e)
                 {
                     e.printStackTrace();
                 }
             }
-
             if ( null != objFilerWriter )
             {
                 try
                 {
                     objFilerWriter.close();
+                    objFilerWriter = null;
                 }
                 catch (IOException e)
                 {
                     e.printStackTrace();
                 }
             }
-
             return true;
         }
         else
@@ -323,6 +360,65 @@ public class LogFile
         SharedPreferences sharedPreferences = ContextUtil.getInstance().getSharedPreferences("config",Context.MODE_PRIVATE);
         String logName = sharedPreferences.getString("logName","");
         return logName;
+    }
+
+    public void uploadInfo()
+    {
+        File sdFile = new File(getSDPath());
+        File allFile[] = sdFile.listFiles();
+        for (int i = 0;i<allFile.length;i++)
+        {
+            File subFile = allFile[i];
+            String name = subFile.getName();
+            Log.d(TAG,name);
+            if (name.contains(".zip"))
+            {
+                UploadRunnable uploadRunnable = new UploadRunnable(name);
+                uploadHandler.post(uploadRunnable);
+            }
+        }
+    }
+
+
+    class UploadRunnable implements Runnable
+    {
+        private String fileName;
+        public UploadRunnable(String name)
+        {
+            fileName = name;
+        }
+
+        @Override
+        public void run()
+        {
+            RequestParams params = new RequestParams();
+            final File myFile = new File(getSDPath()+File.separator+fileName);
+            try
+            {
+                params.put("file", myFile);
+            } catch (FileNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.post("http://192.168.20.130:8082/log/rest/file",params,new AsyncHttpResponseHandler()
+            {
+                @Override
+                public void onSuccess(int i, Header[] headers, byte[] bytes)
+                {
+                    Log.d(TAG,"success");
+                    myFile.delete();
+                }
+
+                @Override
+                public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable)
+                {
+                    Log.d(TAG,"failure=="+throwable);
+
+                }
+            });
+        }
     }
 
 

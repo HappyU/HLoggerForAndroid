@@ -134,15 +134,15 @@ public class Logger
         RecordBean.type = "error";
         RecordBean.eventID = "异常";
         RecordBean.eventClass = "";
-        RecordBean.startDate = "";
+        RecordBean.startDate = getCurDate();
         RecordBean.endDate = "";
         RecordBean.content = msg;
         RecordBean.userID = "";
         RecordBean.netState = "";
         String strMsg = getOutString();
-
         android.util.Log.i(TAG,strMsg);
-        logFile.writeLogFile(strMsg,new LogFile.ILog()
+
+        logFile.readyWrite(strMsg,new LogFile.ILog()
         {
             @Override
             public String getHeaderInfo()
@@ -326,7 +326,7 @@ public class Logger
 
     private static String getOutString()
     {
-        String str = RecordBean.type+","+RecordBean.eventID+","+RecordBean.eventClass+","+RecordBean.content+","+RecordBean.startDate+","+RecordBean.endDate+","+RecordBean.userID+","+RecordBean.netState+"\n";
+        String str = "\""+RecordBean.type+"\",\""+RecordBean.eventID+"\",\""+RecordBean.eventClass+"\",\""+RecordBean.content+"\",\""+RecordBean.startDate+"\",\""+RecordBean.endDate+"\",\""+RecordBean.userID+"\",\""+RecordBean.netState+"\"\n";
         return str;
     }
 
