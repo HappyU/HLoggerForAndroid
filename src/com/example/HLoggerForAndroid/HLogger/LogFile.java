@@ -23,8 +23,11 @@ import java.util.Date;
 public class LogFile
 {
 
+    //内存中日志文件最大值，3kb
+    private static final int LOG_MAX_SIZE = 5  * 1024;
+    //每隔120秒，上传一次。
+    private static final int LOG_UPLOAD_TIME = 120;
 
-    private static final int LOG_MAX_SIZE = 3  * 1024;                        //内存中日志文件最大值，3kb
 
     /*
     private Handler handler = new Handler()

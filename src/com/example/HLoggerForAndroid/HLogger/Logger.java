@@ -23,6 +23,8 @@ public class Logger
 
     private static Context context = ContextUtil.getInstance();
 
+    public static String operateStartDate = "";
+
     /**
      * 获取系统的ID——IMEI
      * */
@@ -94,7 +96,7 @@ public class Logger
     /**
      * 获取当前的时间，本质是long型
      * */
-    private static String getCurDate()
+    public static String getCurDate()
     {
         String str = "" + System.currentTimeMillis()/1000;
         return str;
@@ -172,7 +174,7 @@ public class Logger
         RecordBean.type = "warn";
         RecordBean.eventID = "警告";
         RecordBean.eventClass = "class："+cName+"__method："+mName;
-        RecordBean.startDate = "";
+        RecordBean.startDate =  getCurDate();
         RecordBean.endDate = "";
         RecordBean.content = msg;
         RecordBean.userID = "";
@@ -207,7 +209,7 @@ public class Logger
         RecordBean.type = "info";
         RecordBean.eventID = "信息";
         RecordBean.eventClass = "class："+cName+"__method："+mName;
-        RecordBean.startDate = "";
+        RecordBean.startDate =  getCurDate();
         RecordBean.endDate = "";
         RecordBean.content = msg;
         RecordBean.userID = "";
@@ -241,8 +243,8 @@ public class Logger
         RecordBean.type = "operate";
         RecordBean.eventID = msg;
         RecordBean.eventClass = "";
-        RecordBean.startDate = getCurDate();
-        RecordBean.endDate = getCurDate();
+        RecordBean.startDate = operateStartDate;
+        RecordBean.endDate =  getCurDate();
         RecordBean.content = "";
         RecordBean.userID = "";
         RecordBean.netState = "";
@@ -277,7 +279,7 @@ public class Logger
         RecordBean.type = "info";
         RecordBean.eventID = "信息";
         RecordBean.eventClass = "class："+cName+"__method："+mName;
-        RecordBean.startDate = "";
+        RecordBean.startDate =  getCurDate();
         RecordBean.endDate = "";
         RecordBean.content = msg;
         RecordBean.userID = "";
@@ -342,9 +344,6 @@ public class Logger
         static private String endDate;
         static private String userID;
         static private String netState;
-
-
-
     }
 
 }
